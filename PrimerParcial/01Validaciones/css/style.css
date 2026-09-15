@@ -53,3 +53,56 @@ footer{
 .tarjeta a:hover{
     text-decoration: underline;
 }
+
+.Formulario-registro{
+    width: 100%;
+    max-width: 450px;
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
+}
+
+.Formulario-registro input{
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: #0f172a;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.Formulario-registro button{
+    background-color: steelblue;
+    color: #0f172a;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.Formulario-registro button:hover {
+    background-color: yellow;
+}
+
+.Formulario-registro input.invalido{
+    border-color: red;
+    background-color: skyblue;
+}
+
+.Formulario-registro.exitoso {
+    color: #0f172a;
+    background-color: whitesmoke;
+    border-color: violet;
+    border: 2px solid;
+}
+
+.Formulario-registro.fallido {
+    border: 2px solid #6b7280;
+    background-color: #1f2937;
+}
