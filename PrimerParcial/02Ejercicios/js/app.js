@@ -5,8 +5,22 @@ const talleres = [
   { nombre: 'Desarrollo Web con JS', instructor: 'Ing. María López', cupo: 25, inscritos: 10 },
 ];
 
+const tbody = document.querySelector('#tabla-talleres tbody');
+
 function pintarTabla(){
     //debe de obtener la tabla y rellenarla con los datos de talleres
+
+    const filasHTML = talleres.map((t) => {
+        return
+            <tr>
+                <td>${t.nombre} </td>
+                <td>${t.instructor} </td>
+                <td>${t.cupo} </td>
+                <td>${t.inscritos} </td>
+            </tr>
+        ;
+    }).join('');
+    tbody.innerHTML = filasHTML;
 }
 
 const formArreglos = document.getElementById('form-arreglos');
