@@ -11,14 +11,14 @@ function pintarTabla(){
     //debe de obtener la tabla y rellenarla con los datos de talleres
 
     const filasHTML = talleres.map((t) => {
-        return
+        return `
             <tr>
-                <td>${t.nombre} </td>
-                <td>${t.instructor} </td>
-                <td>${t.cupo} </td>
-                <td>${t.inscritos} </td>
-            </tr>
-        ;
+                <td>${t.nombre}</td>
+                <td>${t.instructor}</td>
+                <td>${t.cupo}</td>
+                <td>${t.inscritos}</td>
+            </tr>   
+        `;
     }).join('');
     tbody.innerHTML = filasHTML;
 }
