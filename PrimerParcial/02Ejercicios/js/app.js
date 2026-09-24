@@ -23,11 +23,11 @@ function pintarTabla(){
     tbody.innerHTML = filasHTML;
 }
 
-const formArreglos = document.getElementById('form-arreglos');
+const formarreglo = document.getElementById('form-arreglo');
 const resultadoArreglos = document.getElementById('resultado-arreglo');
 const selectOperacionArreglo = document.getElementById('operacion-arreglo');
 
-formArreglos.addEventListener('submit', (evento) =>{
+formarreglo.addEventListener('submit', (evento) =>{
     evento.preventDefault();
     const operacion = selectOperacionArreglo.value;
 
@@ -43,3 +43,53 @@ formArreglos.addEventListener('submit', (evento) =>{
     }
     resultadoArreglos.textContent = resultado;
 });
+
+
+
+
+//ejercicio de objetos
+
+const formObjeto = document.getElementById('form-objeto');
+const resultadoObjeto = document.getElementById('resultado-objeto');
+
+formObjeto.addEventListener('submit', (evento) => {
+    evento.preventDefault();
+
+    //necesitamos construir el objeto del taller 
+    const taller = {
+        nombre: document.getElementById('obj-nombre').value,
+        instructor: document.getElementById('obj-instructor').value,
+        cupo: Number(document.getElementById('obj-cupo').value),
+        instructor: Number(document.getElementById('obj-inscritos').value)
+    };
+    
+    const operacion = document.getElementById('operacion-objeto').value;
+
+    let resultado;
+
+    switch(operacion){
+        case 'keys':
+            resultado = JSON.stringify(Object.keys(taller));
+            break;
+        case 'values':
+            break;
+        case 'entries':
+            break;
+        case 'stringify':
+            const textoJson = JSON.stringify(taller, null, 2);
+            resultado = `${textoJson}\n \n tipo: ${typeof textoJson}`;
+            break;
+        case 'roundtrip':
+            const textoJsons = JSON.stringify(taller, null, 2);
+            const objetoDeVuelta = JSON.parse(textoJsons);
+
+            resultado = [
+                textoJsons,
+                '',
+                `tipo:${typeof objetoDeVuelta}`,
+                objetoDeVuelta.nombre
+            ].join('\n');
+            break;
+    }
+    resultadoObjeto.textContent = resultado;
+})
