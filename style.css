@@ -1,0 +1,23 @@
+body{
+ margin: 0;
+ padding: 2rem;
+ background-color: #ff2800;   
+ color: #ffffff;
+ font-family: system-ui, -apple-system, Arial, sans-serif;
+ line-height: 1.6;
+}
+h1{
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+a{
+    color: #ffe600;
+    font-weight: bold;
+    text-decoration: underline;
+}
+a:hover{
+    color: #ffffff;
+}
+a:visited{
+    color: #ffd700;
+}
