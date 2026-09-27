@@ -4,32 +4,15 @@
 
 body{
     margin: 0;
-    padding: 2rem;
     font-family: system-ui, Arial, sans-serif;
-    color: #ffffff;
-    background-color: #ff2800;
-    line-height: 1.6;
+    color: #1f2937;
+    background-color: #290d9a;
 }
 header{
     color: #0f172a;
     background-color: #fff;
     padding: 1.5rem;
     text-align: center;
-}
-h1{
-    color: #ffffff;
-    margin-bottom: 1rem;
-}
-a{
-    color: #ffe600;
-    font-weight: bold;
-    text-decoration: underline;
-}
-a:hover{
-    color: #fff;
-}
-a:visited{
-    color: #ffd700;
 }
 header a {
     color: #2563eb;
@@ -45,21 +28,7 @@ footer{
     color: #6b7280;
     font-size: 0.875rem;
 }
-table{
-    width: 100%;
-    max-width: 800px;
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-}
-th, td{
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
-th{
-    background-color: rgba(0, 0, 0, 0.2);
-    color: #ffffff;
-}
+
 /* Catalogo de talleres */
 
 .catalogo{
