@@ -21,3 +21,18 @@ a:hover{
 a:visited{
     color: #ffd700;
 }
+table{
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+th, td{
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+th{
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+}
