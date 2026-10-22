@@ -1,0 +1,10 @@
+const mysql = require('mysql12/promise');
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    port: 3307,
+    user: 'root',
+    password: 'pelon_2812',
+    database: 'cecyt9_local',
+    dateStrings: true,
+});
