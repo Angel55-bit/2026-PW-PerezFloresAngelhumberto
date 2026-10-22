@@ -4,12 +4,17 @@
 
 //aqui va funcion de correo
 function validarCorreo(correo){
-
+    if (typeof correo !== 'string') return false;
+    const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regexCorreo.test(correo);
 }
 
 //aqui va funcion de boleta
 function validarBoleta(boleta){
-
+    if (typeof boleta !== 'string' && typeof boleta !== 'number') return false;
+    const boletaStr = String(boleta);
+    const regexBoleta = /^[0-9]{10}$/;
+    return regexBoleta.test(boletaStr);
 }
 
 //aqui va funcion de contraseña
