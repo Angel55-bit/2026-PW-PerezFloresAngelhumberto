@@ -30,29 +30,29 @@ app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto: ${PORT}`);
 })
 
-app.get('/usuarios', usuarioControlador.listarUsuarios);
-app.get('/usuarios/:id', usuarioControlador.obtenerUsuario);
-app.post('/usuarios', usuarioControlador.crearUsuario);
-app.put('/usuarios/:id', usuarioControlador.actualizarUsuario);
-app.delete('/usuarios/:id', usuarioControlador.eliminarUsuario);
+app.get('/usuarios', usuarios_controlador.listarUsuarios);
+app.get('/usuarios/:id', usuarios_controlador.obtenerUsuario);
+app.post('/usuarios', usuarios_controlador.crearUsuario);
+app.put('/usuarios/:id', usuarios_controlador.actualizarUsuario);
+app.delete('/usuarios/:id', usuarios_controlador.eliminarUsuario);
  
 
-app.get('/usuarios/:id/talleres', tallerControlador.listarTalleresDeUsuario);
-app.get('/usuarios/:id/asistencias', asistenciaControlador.listarAsistenciaUsuario);
- 
- 
-
-app.get('/talleres', tallerControlador.listarTalleres);
-app.get('/talleres/:id', tallerControlador.obtenerTaller);
-app.post('/talleres', tallerControlador.crearTaller);
-app.put('/talleres/:id', tallerControlador.actualizarTaller);
-app.delete('/talleres/:id', tallerControlador.eliminarTaller);
- 
-
-app.post('/talleres/:id/inscripciones', tallerControlador.inscribirseEnTaller);
-app.get('/talleres/:id/inscritos', tallerControlador.listarInscritosTaller);
+app.get('/usuarios/:id/talleres', talleres_controlador.listarTalleresDeUsuario);
+app.get('/usuarios/:id/asistencias', asistencias_controlador.listarAsistenciaUsuario);
  
  
 
-app.post('/asistencias', asistenciaControlador.registrarAsistencia);
-app.get('/talleres/:id/asistencias', asistenciaControlador.listarAsistenciaTaller);
+app.get('/talleres', talleres_controlador.listarTalleres);
+app.get('/talleres/:id', talleres_controlador.obtenerTaller);
+app.post('/talleres', talleres_controlador.crearTaller);
+app.put('/talleres/:id', talleres_controlador.actualizarTaller);
+app.delete('/talleres/:id', talleres_controlador.eliminarTaller);
+ 
+
+app.post('/talleres/:id/inscripciones', talleres_controlador.inscribirseEnTaller);
+app.get('/talleres/:id/inscritos', talleres_controlador.listarInscritosTaller);
+ 
+ 
+
+app.post('/asistencias', asistencias_controlador.registrarAsistencia);
+app.get('/talleres/:id/asistencias', asistencias_controlador.listarAsistenciaTaller);
