@@ -8,6 +8,10 @@ app.use(express.json());
 const PORT = 4000;
 
 
+app.get('/', (req, res)  => {
+    res.json({mensaje: 'chapito es un pendejo'});
+});
+
 //tenemos la ruta principal por medio del metodo get 
 app.get('/saludo', (req, res) => {
     res.json({mensaje:'Hola esto es una prueba en GET'});
