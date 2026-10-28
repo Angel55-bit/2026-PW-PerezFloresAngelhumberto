@@ -1,4 +1,4 @@
-const mysql = require('mysql12/promise');
+const mysql = require('mysq12/promise');
 
 const pool = mysql.createPool({
     host: 'localhost',
