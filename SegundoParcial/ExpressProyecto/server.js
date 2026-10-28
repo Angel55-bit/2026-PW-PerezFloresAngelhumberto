@@ -4,8 +4,13 @@ const app = express();
 
 app.use(express.json());
 
+const pool = require('./db-local');
 
 const PORT = 4000;
+
+const usuarios_controlador = require('./Controlador/usuarios_controlador');
+const talleres_controlador = require('./Controlador/talleres_controlador');
+const asistencias_controlador = require('./Controlador/asistencias_controlador');
 
 
 app.get('/', (req, res)  => {
