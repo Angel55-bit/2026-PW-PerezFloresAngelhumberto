@@ -29,3 +29,30 @@ app.post('/eco', (req, res) =>{
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto: ${PORT}`);
 })
+
+app.get('/usuarios', usuarioControlador.listarUsuarios);
+app.get('/usuarios/:id', usuarioControlador.obtenerUsuario);
+app.post('/usuarios', usuarioControlador.crearUsuario);
+app.put('/usuarios/:id', usuarioControlador.actualizarUsuario);
+app.delete('/usuarios/:id', usuarioControlador.eliminarUsuario);
+ 
+
+app.get('/usuarios/:id/talleres', tallerControlador.listarTalleresDeUsuario);
+app.get('/usuarios/:id/asistencias', asistenciaControlador.listarAsistenciaUsuario);
+ 
+ 
+
+app.get('/talleres', tallerControlador.listarTalleres);
+app.get('/talleres/:id', tallerControlador.obtenerTaller);
+app.post('/talleres', tallerControlador.crearTaller);
+app.put('/talleres/:id', tallerControlador.actualizarTaller);
+app.delete('/talleres/:id', tallerControlador.eliminarTaller);
+ 
+
+app.post('/talleres/:id/inscripciones', tallerControlador.inscribirseEnTaller);
+app.get('/talleres/:id/inscritos', tallerControlador.listarInscritosTaller);
+ 
+ 
+
+app.post('/asistencias', asistenciaControlador.registrarAsistencia);
+app.get('/talleres/:id/asistencias', asistenciaControlador.listarAsistenciaTaller);
