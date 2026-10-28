@@ -9,7 +9,7 @@ const PORT = 4000;
 
 
 app.get('/', (req, res)  => {
-    res.json({mensaje: 'chapito es un pendejo'});
+    res.json({mensaje: 'Quedo por fin'});
 });
 
 //tenemos la ruta principal por medio del metodo get 
