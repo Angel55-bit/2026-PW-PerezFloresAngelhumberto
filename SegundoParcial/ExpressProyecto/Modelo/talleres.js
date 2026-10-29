@@ -7,17 +7,65 @@ async function listar() {
     return filas;
 }
 
-async function consultarportaller(id) {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres WHERE id = ?`, [id]);
+async function obtenerPorId(id) {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM talleres WHERE id = ?`, [id]);
+}
+
+async function crear({nombre, descripcion, cupo}) {
+    const [info] = await pool.query(
+        `INSERT INTO talleres (nombre, descripcion, cupo) VALUES (?, ?, ?)`,
+        [nombre, descripcion || null, cupo]
+    );
+    return obtenerPorId(info.insertId);
+}
+
+async function actualizar(id, {nombre, descripcion, cupo}) {
+    const cambios = Object.entries({nombre, descripcion, cupo}).filter(([, valor]) => valor !== undefined);
+    if (cambios.length === 0) return obtenerPorId(id);
+
+    const columnas = cambios.map(([columna]) => `${columna} = ?`).join(', ');
+
+    const [info] = await pool.query(
+        `UPDATE talleres SET ${columnas} WHERE id = ?`,
+        [...cambios.map(([, valor]) => valor), id]
+    );
+}
+
+async function eliminar(id) {
+    const [info] = await pool.query(`DELETE FROM talleres WHERE id = ?`, [id]);
+    return info.affectedRows > 0;
+}
+
+async function inscribir(usuarioId, tallerId) {
+    const [info] = await pool.query(
+        `INSERT INTO inscripciones (usuario_id, taller_id) VALUES (?, ?)`,
+        [usuarioId, tallerId]
+    );
+    const [filas] = await pool.query(
+        `SELECT id, usuario_id, taller_id, fecha_registro FROM inscripciones WHERE id = ?`,
+        [info.insertId]
+    );
     return filas[0];
 }
 
-async function registrarseATaller({ usuarioId, tallerId}) {
-    const [info] = await pool.query(
-        `INSERT INTO registros_talleres (usuario_id, taller_id) VALUES (?, ?)`,
-        [usuarioId, tallerId]
+async function listarInscritos(tallerId) {
+    const [filas] = await pool.query(
+        `SELECT u.id, u.nombre, u.correo, u.boleta, i.fecha_registro
+         FROM inscripciones i
+         JOIN usuarios u ON u.id = i.usuario_id
+         WHERE i.taller_id = ?
+         ORDER BY u.nombre`,
+        [tallerId]
     );
-    return {idRegistro: info.insertId, usuarioId, tallerId};
+    return filas;
 }
 
-module.exports = {listar, consultarportaller, registrarseATaller};
+async function estaInscrito(usuarioId, tallerId) {
+    const [filas] = await pool.query(
+        `SELECT id FROM inscripciones WHERE usuario_id = ? AND taller_id = ?`,
+        [usuarioId, tallerId]
+    );
+    return filas.length > 0;
+}
+
+module.exports = {listar, obtenerPorId, crear, actualizar, eliminar, inscribir, listarInscritos, estaInscrito};
