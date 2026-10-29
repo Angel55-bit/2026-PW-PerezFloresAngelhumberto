@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs')
 const usuariosModel = require('../Modelo/usuarios');
 
 const {validarCorreo, validarBoleta, validarContraseña} = require ('../validaciones');
-const { json } = require('express');
 
 //que pasa si el correo y la boleta se duplica
 function esDuplicado(error){
@@ -15,7 +14,7 @@ async function listarUsuarios(req, res) {
         const usuarios = await usuariosModel.listar();
         res.json(usuarios);
     }catch(error){
-        res.status(500).json({error: error.mensage})
+        res.status(500).json({error: error.message})
     }
   
 }
@@ -26,14 +25,14 @@ async function obtenerUsuario(req, res) {
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
         res.json(usuario);
     }catch(error){
-        res.status(500).json({error: error.mensage});
+        res.status(500).json({error: error.message});
     }
     
 }
 
 async function crearUsuario(req, res) {
     const {nombre, correo, contraseña, boleta, rol} = req.body;
-    if(!nombre || !correo || contraseña || !boleta){
+    if(!nombre || !correo || !contraseña || !boleta){
         return res.status(400).json({error: 'nombre, correo, contraseña, y boleta son obligatorios, favor de verificar los datos'});
     }
     if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo no tiene formato valido'});
@@ -47,27 +46,30 @@ async function crearUsuario(req, res) {
         res.status(201).json(usuario);
     }catch(error){
         if (esDuplicado(error) ) return res.status(409).json({error: 'Ya existe un usuario con esa boleta o ese correo'});
-        res.status(500).json({error: error.mensage});
+        res.status(500).json({error: error.message});
     }
 }
 
 async function actualizarUsuario(req, res) {
     const {nombre, correo, rol} = req.body;
 
-    if(correo !== undefined && nombre !== undefined && rol !== undefined){
+    if(correo === undefined && nombre === undefined && rol === undefined){
         res.status(400).json({error: 'Debe ingresar alguno de los siguientes datos para actualizar: nombre, correo o rol'})
     }
     if(correo !== undefined && !validarCorreo(correo)){
         return res.status(400).json({error: 'El correo no tiene un formato valido '});
     }
+    if(nombre !== undefined && (typeof nombre !== 'string' || nombre.trim().length === 0)){
+        return res.status(400).json({error: 'El nombre no es valido'})
+    }
     //faltaria agregar una validacion mas para el nombnre
     try{
         const usuario = await usuariosModel.actualizar(req.params.id, {nombre, correo, rol});
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
-        res.status(401).json(usuario);
+        res.json(usuario);
     }catch(error){
-        if(esDuplicado(error)) res.status(409).json({error: 'Ya existe un usuario con ese correo, ingresa uno diferente'});
-        res.status(500).json({error: 'error.mensaje'})
+        if(esDuplicado(error)) return res.status(409).json({error: 'Ya existe un usuario con ese correo, ingresa uno diferente'});
+        res.status(500).json({error: 'error.messaje'});
     }
 
 
@@ -79,7 +81,7 @@ async function eliminarUsuario(req, res) {
         if(!eliminado) return res.status(404).json({error: 'Usuario no encontrado'});
         res.status(204).send();
     }catch(error){
-        res.status(500).json
+        res.status(500).json({error: error.message});
     }
 }
 

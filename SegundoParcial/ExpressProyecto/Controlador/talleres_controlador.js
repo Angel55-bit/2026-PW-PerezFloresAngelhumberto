@@ -28,11 +28,12 @@ async function listarTalleres(req, res) {
 }
 
 async function obtenerTaller(req, res) {
+    if(!idValido(req.params.id)) return res.status(400).json({error: 'El id del taller es no es valido'});
     try{
-        const talleres = await talleresModel.obtenerPorId(req.params.id);
-        if (!taller) return res.status(404).json({error: 'Taller no encontrado'});
-        res.json(talleres);
-    } catch (error){
+        const taller = await talleresModel.obtenerPorId(req.params.id);
+        if(!taller) return res.status(404).json({error: 'Taller no encontrado'});
+        res.json(taller);
+    }catch(error){
         res.status(500).json({error: error.mensaje});
     }
 }
@@ -44,6 +45,12 @@ async function crearTaller(req, res) {
         return res.status(400).json({ error: 'nombre, descripcion, horario y cupo son obligatorios, favor de verificar los datos' });
     }
 
+    if(!nombreValido(nombre)) {
+        return res.status(400).json({error: 'El nombre del taller no es valido'});
+    }
+    if(!cupoValido(cupo)) {
+        return res.status(400).json({error: 'El cupo debe ser un numero entero mayor a 0'});
+    }
     try {
         const taller = await talleresModel.crear({ nombre, descripcion, horario, cupo });
         res.status(201).json(taller);

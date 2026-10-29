@@ -1,6 +1,6 @@
 const pool = require('../db-local');
 
-const COLUMNAS_PUBLICAS = 'id, noombre, correo, boleta, rol';
+const COLUMNAS_PUBLICAS = 'id, nombre, correo, boleta, rol';
 
 //consultar todos los usuarios
 async function listar() {
@@ -36,16 +36,10 @@ async function actualizar(id, {nombre, correo, rol}) {
 
 //eliminar
 async function eliminar(id) {
-    const [info] =await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
+    const [info] = await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
 
     return info.affectedRows > 0;
 }
-
-async function obtenerPorId() {
-    const [filas] = await pool.query(`DELETEFROM usuarios WHERE id = ?`, [id]);
-    return info.affectedRows > 0;
-}
-
 
 //buscar por correo
 async function buscarPorCorrreoConHAsh(correo) {

@@ -39,7 +39,7 @@ async function registrarAsistencia(req, res) {
             return res.status(400).json({error: 'El usuario no esta inscrito en este taller'});
         }
 
-        const asistencia = await asistenciaModel.registrar({usuarioId, tallerId, fecha});
+        const asistencia = await asistenciasModel.registrar({usuarioId, tallerId, fecha});
         res.status(201).json(asistencia);
     }catch(error){
         if(esDuplicado(error)) return res.status(409).json({error: 'La asistencia ya fue registrada'});
@@ -60,7 +60,7 @@ async function listarAsistenciaTaller(req, res) {
         const taller = await talleresModel.obtenerPorId(req.params.id);
         if(!taller) return res.status(404).json({error: 'Taller no encontrado'});
 
-        const lista = await asistenciaModel.listarPorTaller(req.params.id, fecha);
+        const lista = await asistenciasModel.listarPorTaller(req.params.id, fecha);
         res.json(lista);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -74,7 +74,7 @@ async function listarAsistenciaUsuario(req, res) {
         const usuario = await usuariosModel.obtenerPorId(req.params.id);
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
 
-        const lista = await asistenciaModel.listarPorUsuario(req.params.id);
+        const lista = await asistenciasModel.listarPorUsuario(req.params.id);
         res.json(lista);
     }catch(error){
         res.status(500).json({error: error.message});

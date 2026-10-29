@@ -5,7 +5,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const pool = require('./db-local');
 
 const PORT = 4000;
 
@@ -27,16 +26,12 @@ app.get('/saludo', (req, res) => {
 app.post('/eco', (req, res) =>{
     const {texto} = req.body || {};
     if(!texto){
-        return res.status(400).json({error:'El texto es oblogatorio'});
+        return res.status(400).json({error:'El texto es obligatorio'});
     }
     res.status(201).json({eco:texto});
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto: ${PORT}`);
-})
-
-app.get('./usuarios', usuarios_controlador.listarUsuarios);
+app.get('/usuarios', usuarios_controlador.listarUsuarios);
 app.get('/usuarios/:id', usuarios_controlador.obtenerUsuario);
 app.post('/usuarios', usuarios_controlador.crearUsuario);
 app.put('/usuarios/:id', usuarios_controlador.actualizarUsuario);
@@ -62,3 +57,7 @@ app.get('/talleres/:id/inscritos', talleres_controlador.listarInscritosTaller);
 
 app.post('/asistencias', asistencias_controlador.registrarAsistencia);
 app.get('/talleres/:id/asistencias', asistencias_controlador.listarAsistenciaTaller);
+
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto: ${PORT}`);
+})

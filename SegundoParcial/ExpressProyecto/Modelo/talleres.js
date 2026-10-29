@@ -1,4 +1,5 @@
 const pool = require('../db-local');
+const { listarPorUsuario } = require('./asistencias');
 
 const COLUMNAS_TALLERES = 'id, nombre, descripcion, horario, cupo';
 
@@ -8,10 +9,11 @@ async function listar() {
 }
 
 async function obtenerPorId(id) {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM talleres WHERE id = ?`, [id]);
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres WHERE id = ?`, [id]);
+    return filas[0];
 }
 
-async function crear({nombre, descripcion, cupo}) {
+async function crear({nombre, descripcion, horario, cupo}) {
     const [info] = await pool.query(
         `INSERT INTO talleres (nombre, descripcion, cupo) VALUES (?, ?, ?)`,
         [nombre, descripcion || null, cupo]
@@ -29,6 +31,8 @@ async function actualizar(id, {nombre, descripcion, cupo}) {
         `UPDATE talleres SET ${columnas} WHERE id = ?`,
         [...cambios.map(([, valor]) => valor), id]
     );
+    if (info.affectedRows === 0) return undefined;
+    return obtenerPorId(id);
 }
 
 async function eliminar(id) {
@@ -68,4 +72,16 @@ async function estaInscrito(usuarioId, tallerId) {
     return filas.length > 0;
 }
 
-module.exports = {listar, obtenerPorId, crear, actualizar, eliminar, inscribir, listarInscritos, estaInscrito};
+async function contarInscritos(tallerId) {
+    const [filas] = await pool.query(
+        `SELECT t.id, t.nombre, t.descripción, t.horario, i.fecha_registro
+        FROM inscritos i
+        JOIN talleres t ON t.id = i.taller_id
+        WHERE i.usuario_id = ?
+        ORDER BY t.nombre`,
+        [usuarioId]
+    );
+    return filas;
+}
+
+module.exports = {listar, obtenerPorId, crear, actualizar, eliminar, inscribir, listarInscritos, estaInscrito, contarInscritos, listarPorUsuario};
