@@ -24,18 +24,18 @@ app.get('/saludo', (req, res) => {
 
 //rutas por medio del metodo post, como un endpoint propio
 app.post('/eco', (req, res) =>{
-    const {texto} = req.body;
+    const {texto} = req.body || {};
     if(!texto){
         return res.status(400).json({error:'El texto es oblogatorio'});
     }
-    res.status(201).json({eco:texto})
+    res.status(201).json({eco:texto});
 });
 
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto: ${PORT}`);
 })
 
-app.get('/usuarios', usuarios_controlador.listarUsuarios);
+app.get('./usuarios', usuarios_controlador.listarUsuarios);
 app.get('/usuarios/:id', usuarios_controlador.obtenerUsuario);
 app.post('/usuarios', usuarios_controlador.crearUsuario);
 app.put('/usuarios/:id', usuarios_controlador.actualizarUsuario);
