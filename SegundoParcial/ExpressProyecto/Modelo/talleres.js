@@ -1,6 +1,6 @@
 const pool = require('../db-local');
 
-const COLUMNAS_TALLERES = 'id, nombre, descripción, horario, cupo';
+const COLUMNAS_TALLERES = 'id, nombre, descripcion, horario, cupo';
 
 async function listar() {
     const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres ORDER BY id`);
