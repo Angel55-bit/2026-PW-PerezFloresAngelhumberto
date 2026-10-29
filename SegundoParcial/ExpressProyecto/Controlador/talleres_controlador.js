@@ -23,7 +23,7 @@ async function listarTalleres(req, res) {
         const talleres = await talleresModel.listar();
         res.json(talleres);
     } catch (error){
-        res.status(500).json({error: error.messaje});
+        res.status(500).json({error: error.message});
     }
 }
 
@@ -34,7 +34,7 @@ async function obtenerTaller(req, res) {
         if(!taller) return res.status(404).json({error: 'Taller no encontrado'});
         res.json(taller);
     }catch(error){
-        res.status(500).json({error: error.messaje});
+        res.status(500).json({error: error.message});
     }
 }
 
