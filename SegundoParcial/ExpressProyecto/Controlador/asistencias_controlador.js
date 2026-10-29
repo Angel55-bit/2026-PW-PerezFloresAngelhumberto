@@ -1,22 +1,26 @@
-const asistenciasModel = require('../Modelo/asistencias');
-const talleresModel = require('../Modelo/talleres');
+//necesitamos a los modelos
+const asistenciaModel = require('../Modelo/asistencia');
+const talleresModel = require('../Modelo/Talleres');
 const usuariosModel = require('../Modelo/usuarios');
 
+//que pasa si la asistencia del dia se duplica
 function esDuplicado(error){
     return error.code === 'ER_DUP_ENTRY' || error.code === '23505';
 }
 
-function idValido(valor) {
+function idValido(valor){
     const numero = Number(valor);
     return Number.isInteger(numero) && numero > 0;
 }
 
-function fechaValida(fecha) {
-    if(typeof fecha !== 'string' ||  !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
+//formato YYYY-MM-DD y que la fecha exista (rechaza 2026-02-31)
+function fechaValida(fecha){
+    if(typeof fecha !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
     const date = new Date(`${fecha}T00:00:00Z`);
-    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === fecha; 
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === fecha;
 }
 
+//registrar asistencia en el taller
 async function registrarAsistencia(req, res) {
     const {usuarioId, tallerId, fecha} = req.body;
 
@@ -39,7 +43,7 @@ async function registrarAsistencia(req, res) {
             return res.status(400).json({error: 'El usuario no esta inscrito en este taller'});
         }
 
-        const asistencia = await asistenciasModel.registrar({usuarioId, tallerId, fecha});
+        const asistencia = await asistenciaModel.registrar({usuarioId, tallerId, fecha});
         res.status(201).json(asistencia);
     }catch(error){
         if(esDuplicado(error)) return res.status(409).json({error: 'La asistencia ya fue registrada'});
@@ -60,13 +64,14 @@ async function listarAsistenciaTaller(req, res) {
         const taller = await talleresModel.obtenerPorId(req.params.id);
         if(!taller) return res.status(404).json({error: 'Taller no encontrado'});
 
-        const lista = await asistenciasModel.listarPorTaller(req.params.id, fecha);
+        const lista = await asistenciaModel.listarPorTaller(req.params.id, fecha);
         res.json(lista);
     }catch(error){
         res.status(500).json({error: error.message});
     }
 }
 
+//consultar las asistencias de un alumno
 async function listarAsistenciaUsuario(req, res) {
     if(!idValido(req.params.id)) return res.status(400).json({error: 'El id del usuario no es valido'});
 
@@ -74,7 +79,7 @@ async function listarAsistenciaUsuario(req, res) {
         const usuario = await usuariosModel.obtenerPorId(req.params.id);
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
 
-        const lista = await asistenciasModel.listarPorUsuario(req.params.id);
+        const lista = await asistenciaModel.listarPorUsuario(req.params.id);
         res.json(lista);
     }catch(error){
         res.status(500).json({error: error.message});

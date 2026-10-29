@@ -1,28 +1,31 @@
 const pool = require('../db-local');
-const { listarPorUsuario } = require('./asistencias');
 
-const COLUMNAS_TALLERES = 'id, nombre, descripcion, horario, cupo';
+const COLUMNAS_PUBLICAS = 'id, nombre, descripcion, cupo, fecha_inicio, imparte';
+
 
 async function listar() {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres ORDER BY id`);
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM talleres ORDER BY id`);
     return filas;
 }
 
+
 async function obtenerPorId(id) {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres WHERE id = ?`, [id]);
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM talleres WHERE id = ?`, [id]);
     return filas[0];
 }
 
-async function crear({nombre, descripcion, horario, cupo}) {
+
+async function crear({nombre, descripcion, cupo, fecha_inicio, imparte}) {
     const [info] = await pool.query(
-        `INSERT INTO talleres (nombre, descripcion, cupo) VALUES (?, ?, ?)`,
-        [nombre, descripcion || null, cupo]
+        `INSERT INTO talleres (nombre, descripcion, cupo, fecha_inicio, imparte) VALUES (?, ?, ?, ?, ?)`,
+        [nombre, descripcion || null, cupo, fecha_inicio || null, imparte || null]
     );
     return obtenerPorId(info.insertId);
 }
 
-async function actualizar(id, {nombre, descripcion, cupo}) {
-    const cambios = Object.entries({nombre, descripcion, cupo}).filter(([, valor]) => valor !== undefined);
+
+async function actualizar(id, {nombre, descripcion, cupo, fecha_inicio, imparte}) {
+    const cambios = Object.entries({nombre, descripcion, cupo, fecha_inicio, imparte}).filter(([, valor]) => valor !== undefined);
     if (cambios.length === 0) return obtenerPorId(id);
 
     const columnas = cambios.map(([columna]) => `${columna} = ?`).join(', ');
@@ -31,15 +34,19 @@ async function actualizar(id, {nombre, descripcion, cupo}) {
         `UPDATE talleres SET ${columnas} WHERE id = ?`,
         [...cambios.map(([, valor]) => valor), id]
     );
+
     if (info.affectedRows === 0) return undefined;
     return obtenerPorId(id);
 }
+
 
 async function eliminar(id) {
     const [info] = await pool.query(`DELETE FROM talleres WHERE id = ?`, [id]);
     return info.affectedRows > 0;
 }
 
+
+//inscribir a un usuario en un taller
 async function inscribir(usuarioId, tallerId) {
     const [info] = await pool.query(
         `INSERT INTO inscripciones (usuario_id, taller_id) VALUES (?, ?)`,
@@ -52,14 +59,28 @@ async function inscribir(usuarioId, tallerId) {
     return filas[0];
 }
 
+
+//consultar los alumnos inscritos en un taller
 async function listarInscritos(tallerId) {
     const [filas] = await pool.query(
         `SELECT u.id, u.nombre, u.correo, u.boleta, i.fecha_registro
-         FROM inscripciones i
-         JOIN usuarios u ON u.id = i.usuario_id
-         WHERE i.taller_id = ?
-         ORDER BY u.nombre`,
+        FROM inscripciones i
+        JOIN usuarios u ON u.id = i.usuario_id
+        WHERE i.taller_id = ?
+        ORDER BY u.nombre`,
         [tallerId]
+    );
+    return filas;
+}
+
+async function listarPorUsuario(usuarioId) {
+    const [filas] = await pool.query(
+        `SELECT t.id, t.nombre, t.descripcion, t.cupo, t.fecha_inicio, t.imparte
+         FROM inscripciones i
+         JOIN talleres t ON t.id = i.taller_id
+         WHERE i.usuario_id = ?
+         ORDER BY t.fecha_inicio DESC, t.nombre`,
+        [usuarioId]
     );
     return filas;
 }
@@ -72,16 +93,32 @@ async function estaInscrito(usuarioId, tallerId) {
     return filas.length > 0;
 }
 
-async function contarInscritos(tallerId) {
+async function tieneInscripcion(usuarioId) {
     const [filas] = await pool.query(
-        `SELECT t.id, t.nombre, t.descripción, t.horario, i.fecha_registro
-        FROM inscritos i
-        JOIN talleres t ON t.id = i.taller_id
-        WHERE i.usuario_id = ?
-        ORDER BY t.nombre`,
+        `SELECT id FROM inscripciones WHERE usuario_id = ? LIMIT 1`,
         [usuarioId]
     );
-    return filas;
+    return filas.length > 0;
 }
 
-module.exports = {listar, obtenerPorId, crear, actualizar, eliminar, inscribir, listarInscritos, estaInscrito, contarInscritos, listarPorUsuario};
+async function contarInscritos(tallerId) {
+    const [filas] = await pool.query(
+        `SELECT COUNT(*) AS total FROM inscripciones WHERE taller_id = ?`,
+        [tallerId]
+    );
+    return Number(filas[0].total);
+}
+
+module.exports = {
+    listar,
+    obtenerPorId,
+    crear,
+    actualizar,
+    eliminar,
+    inscribir,
+    listarInscritos,
+    listarPorUsuario,
+    estaInscrito,
+    tieneInscripcion,
+    contarInscritos
+};

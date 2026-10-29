@@ -1,5 +1,6 @@
 const pool = require('../db-local');
 
+
 async function obtenerPorId(id) {
     const [filas] = await pool.query(
         `SELECT id, usuario_id, taller_id, fecha FROM asistencias WHERE id = ?`,
@@ -8,6 +9,7 @@ async function obtenerPorId(id) {
     return filas[0];
 }
 
+
 async function registrar({usuarioId, tallerId, fecha}) {
     const [info] = await pool.query(
         `INSERT INTO asistencias (usuario_id, taller_id, fecha) VALUES (?, ?, COALESCE(?, CURDATE()))`,
@@ -15,6 +17,7 @@ async function registrar({usuarioId, tallerId, fecha}) {
     );
     return obtenerPorId(info.insertId);
 }
+
 
 async function listarPorTaller(tallerId, fecha) {
     const parametros = [tallerId];
@@ -36,6 +39,7 @@ async function listarPorTaller(tallerId, fecha) {
     return filas;
 }
 
+
 async function listarPorUsuario(usuarioId) {
     const [filas] = await pool.query(
         `SELECT a.id, a.fecha, t.id AS taller_id, t.nombre AS taller
@@ -47,5 +51,6 @@ async function listarPorUsuario(usuarioId) {
     );
     return filas;
 }
+
 
 module.exports = {obtenerPorId, registrar, listarPorTaller, listarPorUsuario};

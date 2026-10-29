@@ -1,22 +1,23 @@
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 //necesitamos al modelo
 const usuariosModel = require('../Modelo/usuarios');
 
-const {validarCorreo, validarBoleta, validarContraseña} = require ('../validaciones');
+const {validarCorreo, validarContraseña, validarBoleta, validarNombre} = require('../validaciones')
 
 //que pasa si el correo y la boleta se duplica
 function esDuplicado(error){
-    return error.code === 'ER_DUP_ENTRY' || error.code === '23505'
+    return error.code === 'ER_DUP_ENTRY' || error.code === '23505';
 }
 
-async function listarUsuarios(req, res) {
+
+async function listarUsuarios(req , res) {
     try{
         const usuarios = await usuariosModel.listar();
         res.json(usuarios);
     }catch(error){
         res.status(500).json({error: error.message})
     }
-  
+    
 }
 
 async function obtenerUsuario(req, res) {
@@ -27,52 +28,63 @@ async function obtenerUsuario(req, res) {
     }catch(error){
         res.status(500).json({error: error.message});
     }
-    
 }
 
 async function crearUsuario(req, res) {
-    const {nombre, correo, contraseña, boleta, rol} = req.body;
-    if(!nombre || !correo || !contraseña || !boleta){
+    const {nombre, correo, contrasena, boleta, rol} = req.body;
+    const rolesValidos = ['alumno', 'profesor'];
+    const rolFinal = rolesValidos.includes(rol) ? rol : 'alumno';
+
+    if(!nombre || !correo || !contrasena || !boleta){
         return res.status(400).json({error: 'nombre, correo, contraseña, y boleta son obligatorios, favor de verificar los datos'});
     }
-    if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo no tiene formato valido'});
+    if(!validarNombre(nombre)) return res.status(400).json({error: 'El nombre solo debe contener letras y espacios'});
+    if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo not iene formato valido'});
     if(!validarBoleta(boleta)) return res.status(400).json({error: 'La boleta debe tener 10 digitos'});
-    if(!validarContraseña(contraseña)) return res.status(400).json({error: 'La contraseña debe tener al menos 8 caracteres'});
+    if(!validarContraseña(contrasena)) return res.status(400).json({error: 'La contraseña debe tener al menos 8 caracteres'});
 
     try{
-        const contraseñaHash = await bcrypt.hash(contraseña, 10);
-        const usuario = await usuariosModel.crear({nombre, correo, contraseñaHash, boleta, rol});
+        const contrasenaHash = await bcrypt.hash(contrasena, 10);
+        const nombreLimpio = nombre.trim();
+        const usuario = await usuariosModel.crear({nombre: nombreLimpio, correo, contrasenaHash, boleta, rol: rolFinal});
 
         res.status(201).json(usuario);
     }catch(error){
-        if (esDuplicado(error) ) return res.status(409).json({error: 'Ya existe un usuario con esa boleta o ese correo'});
+        if (esDuplicado(error)) return res.status(409).json({error:'Ya existe un usuario con esa boleta o ese correo'});
         res.status(500).json({error: error.message});
     }
+    
 }
 
 async function actualizarUsuario(req, res) {
     const {nombre, correo, rol} = req.body;
 
+    if(!idValido(req.params.id)) return res.status(400).json({error: 'El id del usuario no es valido'});
+
+
     if(correo === undefined && nombre === undefined && rol === undefined){
-        res.status(400).json({error: 'Debe ingresar alguno de los siguientes datos para actualizar: nombre, correo o rol'})
+        return res.status(400).json({error: 'Envía al menos uno de: nombre, correo, rol'});
     }
     if(correo !== undefined && !validarCorreo(correo)){
-        return res.status(400).json({error: 'El correo no tiene un formato valido '});
+        return res.status(400).json({error : 'El correo no tiene un formato valido'});
     }
-    if(nombre !== undefined && (typeof nombre !== 'string' || nombre.trim().length === 0)){
-        return res.status(400).json({error: 'El nombre no es valido'})
+    if(nombre !== undefined && !validarNombre(nombre)){
+        return res.status(400).json({error: 'El nombre solo debe contener letras y espacios'});
     }
-    //faltaria agregar una validacion mas para el nombnre
     try{
-        const usuario = await usuariosModel.actualizar(req.params.id, {nombre, correo, rol});
+        const nombreLimpio = nombre !== undefined ? nombre.trim() : undefined;
+        const usuario = await usuariosModel.actualizar(req.params.id, {nombre: nombreLimpio, correo, rol});
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
         res.json(usuario);
     }catch(error){
-        if(esDuplicado(error)) return res.status(409).json({error: 'Ya existe un usuario con ese correo, ingresa uno diferente'});
-        res.status(500).json({error: 'error.messaje'});
+        if(esDuplicado(error))return res.status(409).json({error: 'Ya existe un usuario con ese correo, ingresa uno diferente'});
+        res.status(500).json({error: error.message});
     }
-
-
+    function idValido(valor){
+    const numero = Number(valor);
+    return Number.isInteger(numero) && numero > 0;
+}
+    
 }
 
 async function eliminarUsuario(req, res) {
