@@ -3,7 +3,11 @@ const pool = require('../db-local');
 
 async function obtenerPorId(id) {
     const [filas] = await pool.query(
-        `SELECT id, usuario_id, taller_id, fecha FROM asistencias WHERE id = ?`,
+        `SELECT a.id, a.usuario_id, a.taller_id, a.fecha, a.fecha AS fecha_registro,
+                u.nombre AS nombre_alumno, u.boleta
+         FROM asistencias a
+         JOIN usuarios u ON u.id = a.usuario_id
+         WHERE a.id = ?`,
         [id]
     );
     return filas[0];
@@ -29,7 +33,8 @@ async function listarPorTaller(tallerId, fecha) {
     }
 
     const [filas] = await pool.query(
-        `SELECT a.id, a.fecha, u.id AS usuario_id, u.nombre, u.boleta
+        `SELECT a.id, a.fecha, a.fecha AS fecha_registro,
+                u.id AS usuario_id, u.nombre, u.nombre AS nombre_alumno, u.boleta
          FROM asistencias a
          JOIN usuarios u ON u.id = a.usuario_id
          WHERE a.taller_id = ? ${filtroFecha}
@@ -51,6 +56,5 @@ async function listarPorUsuario(usuarioId) {
     );
     return filas;
 }
-
 
 module.exports = {obtenerPorId, registrar, listarPorTaller, listarPorUsuario};

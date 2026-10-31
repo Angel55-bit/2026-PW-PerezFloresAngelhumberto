@@ -1,0 +1,104 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f7f7f5;
+  color: #242424;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 14px max(20px, calc((100% - 1040px) / 2));
+  border-bottom: 1px solid #deded9;
+  background: #fff;
+  font-family: Arial, sans-serif;
+}
+
+nav a {
+  color: #6b1d3a;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+main {
+  width: min(1040px, calc(100% - 32px));
+  margin: 32px auto;
+}
+
+h1,
+h2,
+h3 {
+  color: #3a202a;
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+input,
+button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #b9b9b3;
+  border-radius: 4px;
+  font: inherit;
+}
+
+input {
+  min-width: 220px;
+  background: #fff;
+}
+
+button {
+  border-color: #6b1d3a;
+  background: #6b1d3a;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #deded9;
+  text-align: left;
+}
+
+@media (max-width: 520px) {
+  nav {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .formulario {
+    flex-direction: column;
+  }
+
+  input,
+  button {
+    width: 100%;
+  }
+}

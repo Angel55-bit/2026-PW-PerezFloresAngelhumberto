@@ -1,6 +1,8 @@
 const pool = require('../db-local');
 
-const COLUMNAS_PUBLICAS = 'id, nombre, descripcion, cupo, fecha_inicio, imparte';
+const COLUMNAS_PUBLICAS = `id, nombre, descripcion, cupo, fecha_inicio, fecha_inicio AS fecha,
+    imparte, imparte AS instructor,
+    (SELECT COUNT(*) FROM asistencias a WHERE a.taller_id = talleres.id) AS asistentes`;
 
 
 async function listar() {
@@ -75,7 +77,8 @@ async function listarInscritos(tallerId) {
 
 async function listarPorUsuario(usuarioId) {
     const [filas] = await pool.query(
-        `SELECT t.id, t.nombre, t.descripcion, t.cupo, t.fecha_inicio, t.imparte
+        `SELECT t.id, t.nombre, t.descripcion, t.cupo, t.fecha_inicio, t.fecha_inicio AS fecha,
+                t.imparte, t.imparte AS instructor
          FROM inscripciones i
          JOIN talleres t ON t.id = i.taller_id
          WHERE i.usuario_id = ?

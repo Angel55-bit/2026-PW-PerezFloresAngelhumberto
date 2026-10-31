@@ -1,6 +1,6 @@
 //necesitamos a los modelos
 const asistenciaModel = require('../Modelo/asistencia');
-const talleresModel = require('../Modelo/Talleres');
+const talleresModel = require('../Modelo/talleres');
 const usuariosModel = require('../Modelo/usuarios');
 
 //que pasa si la asistencia del dia se duplica
@@ -22,9 +22,21 @@ function fechaValida(fecha){
 
 //registrar asistencia en el taller
 async function registrarAsistencia(req, res) {
-    const {usuarioId, tallerId, fecha} = req.body;
+    const body = req.body || {};
+    const asistenciaDirecta = body.taller_id !== undefined
+        || body.nombre_alumno !== undefined
+        || body.boleta !== undefined;
+    let usuarioId = body.usuarioId;
+    const tallerId = asistenciaDirecta ? body.taller_id : body.tallerId;
+    const fecha = body.fecha;
 
-    if(!idValido(usuarioId) || !idValido(tallerId)){
+    if(asistenciaDirecta && (!body.taller_id || !body.nombre_alumno || !body.boleta)){
+        return res.status(400).json({error: 'taller_id, nombre_alumno y boleta son obligatorios'});
+    }
+    if(asistenciaDirecta && !/^\d{10}$/.test(body.boleta)){
+        return res.status(400).json({error: 'La boleta debe tener 10 digitos'});
+    }
+    if(!asistenciaDirecta && (!idValido(usuarioId) || !idValido(tallerId))){
         return res.status(400).json({error: 'Usuarios y taller son obligatorios y deben ser validos'});
     }
     if(fecha !== undefined && !fechaValida(fecha)){
@@ -35,11 +47,20 @@ async function registrarAsistencia(req, res) {
         const taller = await talleresModel.obtenerPorId(tallerId);
         if(!taller) return res.status(404).json({error: 'Taller no encontrado'});
 
+        if(asistenciaDirecta){
+            const usuario = await usuariosModel.obtenerPorBoleta(body.boleta);
+            if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
+            usuarioId = usuario.id;
+        }
+        if(!idValido(usuarioId) || !idValido(tallerId)){
+            return res.status(400).json({error: 'Usuarios y taller son obligatorios y deben ser validos'});
+        }
+
         const usuario = await usuariosModel.obtenerPorId(usuarioId);
         if(!usuario) return res.status(404).json({error: 'Usuario no encontrado'});
 
         //solo puede asistir quien esta inscrito en el taller
-        if(!(await talleresModel.estaInscrito(usuarioId, tallerId))){
+        if(!asistenciaDirecta && !(await talleresModel.estaInscrito(usuarioId, tallerId))){
             return res.status(400).json({error: 'El usuario no esta inscrito en este taller'});
         }
 

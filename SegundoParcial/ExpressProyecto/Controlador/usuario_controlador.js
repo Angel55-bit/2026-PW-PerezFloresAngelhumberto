@@ -9,6 +9,11 @@ function esDuplicado(error){
     return error.code === 'ER_DUP_ENTRY' || error.code === '23505';
 }
 
+function idValido(valor){
+    const numero = Number(valor);
+    return Number.isInteger(numero) && numero > 0;
+}
+
 
 async function listarUsuarios(req , res) {
     try{
@@ -36,11 +41,11 @@ async function crearUsuario(req, res) {
     const rolFinal = rolesValidos.includes(rol) ? rol : 'alumno';
 
     if(!nombre || !correo || !contrasena || !boleta){
-        return res.status(400).json({error: 'nombre, correo, contraseña, y boleta son obligatorios, favor de verificar los datos'});
+        return res.status(400).json({error: 'nombre, correo, contrasena y boleta son obligatorios'});
     }
     if(!validarNombre(nombre)) return res.status(400).json({error: 'El nombre solo debe contener letras y espacios'});
-    if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo not iene formato valido'});
-    if(!validarBoleta(boleta)) return res.status(400).json({error: 'La boleta debe tener 10 digitos'});
+    if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo no tiene un formato válido'});
+    if(!validarBoleta(boleta)) return res.status(400).json({error: 'La boleta debe tener 10 dígitos'});
     if(!validarContraseña(contrasena)) return res.status(400).json({error: 'La contraseña debe tener al menos 8 caracteres'});
 
     try{
@@ -50,7 +55,7 @@ async function crearUsuario(req, res) {
 
         res.status(201).json(usuario);
     }catch(error){
-        if (esDuplicado(error)) return res.status(409).json({error:'Ya existe un usuario con esa boleta o ese correo'});
+        if (esDuplicado(error)) return res.status(409).json({error:'Ya existe un usuario con ese correo o boleta'});
         res.status(500).json({error: error.message});
     }
     
@@ -80,14 +85,11 @@ async function actualizarUsuario(req, res) {
         if(esDuplicado(error))return res.status(409).json({error: 'Ya existe un usuario con ese correo, ingresa uno diferente'});
         res.status(500).json({error: error.message});
     }
-    function idValido(valor){
-    const numero = Number(valor);
-    return Number.isInteger(numero) && numero > 0;
-}
-    
 }
 
 async function eliminarUsuario(req, res) {
+    if(!idValido(req.params.id)) return res.status(404).json({error: 'Usuario no encontrado'});
+
     try{
         const eliminado = await usuariosModel.eliminar(req.params.id);
         if(!eliminado) return res.status(404).json({error: 'Usuario no encontrado'});

@@ -1,6 +1,5 @@
-const talleresModel = require('../Modelo/Talleres');
+const talleresModel = require('../Modelo/talleres');
 const usuariosModel = require('../Modelo/usuarios');
-const {validarNombre} = require('../validaciones');
 
 //que pasa si el nombre del taller o la inscripcion se duplica
 function esDuplicado(error){
@@ -18,6 +17,12 @@ function cupoValido(cupo){
 
 function nombreValido(nombre){
     return typeof nombre === 'string' && nombre.trim().length > 0;
+}
+
+function instructorValido(instructor){
+    return typeof instructor === 'string'
+        && /^[A-Za-zÁÉÍÓÚáéíóúÑñ.\s]+$/.test(instructor.trim())
+        && instructor.trim().length > 0;
 }
 
 function fechaInicioValida(fecha){
@@ -46,7 +51,7 @@ async function listarTalleres(req, res) {
 }
 
 async function obtenerTaller(req, res) {
-    if(!idValido(req.params.id)) return res.status(400).json({error: 'El id del taller no es valido'});
+    if(!idValido(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
 
     try{
         const taller = await talleresModel.obtenerPorId(req.params.id);
@@ -58,15 +63,18 @@ async function obtenerTaller(req, res) {
 }
 
 async function crearTaller(req, res) {
-    const {nombre, descripcion, cupo, fecha_inicio, imparte} = req.body;
+    const {nombre, descripcion, cupo} = req.body;
+    const fecha_inicio = req.body.fecha_inicio ?? req.body.fecha;
+    const imparte = req.body.imparte ?? req.body.instructor;
 
-    if(!nombre || cupo === undefined || !fecha_inicio || !imparte){
-        return res.status(400).json({error: 'nombre, cupo, fecha de inicio e impartidor son obligatorios, verifica los datos'});
+    if(!nombre || !fecha_inicio){
+        return res.status(400).json({error: 'nombre y fecha son obligatorios'});
     }
     if(!nombreValido(nombre)) return res.status(400).json({error: 'El nombre del taller no es valido'});
+    if(cupo === undefined) return res.status(400).json({error: 'El cupo es obligatorio'});
     if(!cupoValido(cupo)) return res.status(400).json({error: 'El cupo debe ser un numero entero mayor a 0'});
     if(!fechaInicioValida(fecha_inicio)) return res.status(400).json({error: 'La fecha de inicio debe estar entre hoy y el 31/12/2030'});
-    if(!validarNombre(imparte)) return res.status(400).json({error: 'El nombre del instructor solo debe contener letras y espacios'});
+    if(imparte !== undefined && !instructorValido(imparte)) return res.status(400).json({error: 'El nombre del instructor no es valido'});
 
     try{
         const taller = await talleresModel.crear({
@@ -84,7 +92,9 @@ async function crearTaller(req, res) {
 }
 
 async function actualizarTaller(req, res) {
-    const {nombre, descripcion, cupo, fecha_inicio, imparte} = req.body;
+    const {nombre, descripcion, cupo} = req.body;
+    const fecha_inicio = req.body.fecha_inicio ?? req.body.fecha;
+    const imparte = req.body.imparte ?? req.body.instructor;
 
     if(!idValido(req.params.id)) return res.status(400).json({error: 'El id del taller no es valido'});
 
@@ -100,8 +110,8 @@ async function actualizarTaller(req, res) {
     if(fecha_inicio !== undefined && !fechaInicioValida(fecha_inicio)){
         return res.status(400).json({error: 'La fecha de inicio debe estar entre hoy y el 31/12/2030'});
     }
-    if(imparte !== undefined && !validarNombre(imparte)){
-        return res.status(400).json({error: 'El nombre del instructor solo debe contener letras y espacios'});
+    if(imparte !== undefined && !instructorValido(imparte)){
+        return res.status(400).json({error: 'El nombre del instructor no es valido'});
     }
 
     try{

@@ -18,6 +18,14 @@ async function obtenerPorId(id) {
     return filas[0];
 }
 
+async function obtenerPorBoleta(boleta) {
+    const [filas] = await pool.query(
+        `SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE boleta = ?`,
+        [boleta]
+    );
+    return filas[0];
+}
+
 //registar usuario
 
 async function crear({nombre, correo, contrasenaHash, boleta, rol}) {
@@ -55,7 +63,7 @@ async function buscarPorCorreoConHash(correo){
 } 
 
 //siempre es necesario exportar las funciones para poder crear su api
-module.exports = {listar, obtenerPorId, crear, actualizar, eliminar, buscarPorCorreoConHash};
+module.exports = {listar, obtenerPorId, obtenerPorBoleta, crear, actualizar, eliminar, buscarPorCorreoConHash};
 
 //deberan crear las otras entidade talleres y asistencia
 //pára talleres hay que crear la funciones de consultarportaller y registrarse en un taller
