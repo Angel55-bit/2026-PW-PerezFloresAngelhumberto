@@ -6,6 +6,8 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session); //Store es el almacenamiento, localstoras permanece en todos los navegadores
 const { crearModeloUsuarios } = require('./modelos/usuarios.modelo');
 const { error } = require('console');
+const { nextTick } = require('process');
+const { NONAME } = require('dns');
 
 const NOMBRE_COOKIE = 'connect.sid'; //toda cokkie tiene que tener un identificador, no tienen una estructura definida
 
@@ -82,8 +84,9 @@ function crearApp(config, pool) {
       return req.session.destroy(()=>{
         res.clearCookie( NOMBRE_COOKIE);
         res.status(401).json({error: '401 tu sesion se vencio vuelve a iniciar sesion'})
-      })
+      });
     }
+    
     // Paso 1 (en clase)
     return pendiente(1)(req, res, next);
   }
@@ -91,26 +94,69 @@ function crearApp(config, pool) {
   // 403: "sé quién eres, pero no tienes permiso".
   function requiereRol(rol) {
     // Paso 3 (en clase)
-    return pendiente(3);
+    return (req, res, next) => {
+      if(req.session.usuario.rol !== rol){
+        return res.json({error: `403. Eres ${req.sesion.usuario.usuario}, pero esta ruta es solo para ${rol}`});
+      }
+      next();
+    };
   }
 
+  //vamos a empezar a configurar las rutas
   // ---------- Rutas ----------
 
   app.get('/api/config', (req, res) => res.json(config));
 
+  //vamos a crear una ruta para un perfil visitante y obtener su sesion a partir de una cookie
   // Guarda un contador en la sesión. Sirve para ver que la sesión existe antes de entrar
   // (y para la demostración de fijación de sesión).
   app.post('/api/visita', (req, res) => {
-    if (!req.session) return pendiente(1)(req, res);
+    if (!req.session) return res.json({error: 'No tiene una sesion asociada'});
     req.session.visitas = (req.session.visitas || 0) + 1;
     res.json({ visitas: req.session.visitas, sesion: idCorto(req.sessionID) });
   });
 
   // Paso 2 (en clase): iniciar sesión. Paso 7 (en clase): regenerar el id al entrar.
-  app.post('/api/login', pendiente(2));
+  app.post('/api/login', async(req, res, next)=>{
+    try{
+      const {usuario, contrasena} = req.body || {};
+      const datos = await usuario.verificar(usuario, contrasena);
+      if(!datos) return res.status(401).json({error: 'Usuario o contraseña incorrecto'});
+      const visitas = req.session.visitas || 0;
+
+      const guardar = () =>{
+        req.session.usuario = datos;
+        req.session.visitas = visitas;
+        req.session.creada = Date.now();
+        req.session.ultimoUso = Date.now();
+        req.session.save((error)=>{
+          if(error) return next(error);
+          res.json({usuario: datos, sesionAntes : antes, sesionDespues : idCorto(req.sessionID)});
+
+        });
+      }
+
+      if(config.regenerarAlEntrar){
+        //vamos a generar la sesion
+        req.session.regenerate((error) => (error ? next(error): guardar()));
+      }else{
+        guardar();
+      }
+
+      //debemos crear la sesion
+      const antes = req.session.visitas !== undefined ? idCorto(req.sessionID) : null;
+    }catch(error){
+      next(error); //se genera un buncle con el cual se obliga a que se realice
+    }
+  });
 
   // Paso 2 (en clase): cerrar sesión.
-  app.post('/api/logout', pendiente(2));
+  app.post('/api/logout', (req, res, next)=>{
+    req.session.destroy((error)=>{
+      res.clearCookie(NOMBRE_COOKIE);
+      res.json({mensaje : 'Sesion cerrada'});
+    });
+  });
 
   app.get('/api/sesion', requiereSesion, (req, res) => {
     const desde = config.rolling ? req.session.ultimoUso : req.session.creada;
