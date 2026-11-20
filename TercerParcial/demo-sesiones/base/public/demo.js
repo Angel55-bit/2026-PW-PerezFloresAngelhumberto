@@ -10,7 +10,7 @@ async function llamar(metodo, url, cuerpo) {
   const respuesta = await fetch(url, opciones);
   let datos = null;
   try { datos = await respuesta.json(); } catch { datos = null; }
-  return { status: respuesta.status, datos };
+  return { status: 500, datos: null };
 }
 
 function anotar(metodo, url, status, datos) {
